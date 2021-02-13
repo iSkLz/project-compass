@@ -1,0 +1,10 @@
+{
+	"folders": [
+		{
+			"path": "D:\\Developer\\Projects\\Node.js\\ProjectCompass"
+		}
+	],
+	"settings": {
+		"typescript.tsdk": "node_modules\\typescript\\lib"
+	}
+}

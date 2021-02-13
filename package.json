@@ -1,0 +1,16 @@
+{
+  "name": "celestialcompass",
+  "version": "0.0.1",
+  "description": "A highly extensible IME for Celeste and Everest",
+  "main": "build/core/boot.js",
+  "scripts": {
+    "tsw": "tsc -w"
+  },
+  "author": "SkLz",
+  "license": "MIT",
+  "dependencies": {
+    "electron": "^11.2.3",
+    "typescript": "^4.0.3",
+    "ws": "^7.4.3"
+  }
+}
