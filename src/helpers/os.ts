@@ -8,15 +8,21 @@ class OSHelper {
     public static instance = new OSHelper();
 
     public type: OSType;
+    public isWindows: boolean = false;
+    public isLinux: boolean = false;
+    public isMac: boolean = false;
 
     constructor() {
         switch (os.type().toLowerCase()) {
             case "darwin":
                 this.type = OSType.mac;
+                this.isMac = true;
             case "windows_nt":
                 this.type = OSType.win;
+                this.isWindows = true;
             default:
                 this.type = OSType.linux;
+                this.isLinux = true;
         }
     }
 }

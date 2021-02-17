@@ -22,5 +22,5 @@ export default interface Plugin {
     /**
      * Any other info to send for the module
      */
-    other: any;
+    data: any;
 }

@@ -1,26 +1,63 @@
 import { protocol } from "electron";
-import fs from "fs";
+import { serializeError } from "serialize-error";
+import fs, { createReadStream } from "fs";
 import path from "path";
 
-// TODO: Implement all MIME types
+// TODO: Implement formats
+//const extensions = JSON.parse(fs.readFileSync(path.join(PathHelper.data, "fileTypes.json"), "utf8"));
 const extensions = {
-    text: ["html", "js", "css", "xml", "json", "txt"],
-    image: ["png", "svg", "jpg", "jpeg", "bmp", "gif"]
+    html: "text/html",
+    css: "text/css",
+    js: "application/javascript",
+    json: "application/json"
 };
 
 export default function fileDelivery(name: string, dir: string) {
-    protocol.registerStreamProtocol(name, (request, callback) => {
-        let filePath = path.join(request.url.substring(name.length + 3));
-        let fileExt = path.parse(filePath).ext;
-        
-        let fileMIME = MIME
+    // Long sessions will unevitably run into conflicting protocol names
+    // Most of the time, window IDs
+    protocol.unregisterProtocol(name);
+    return protocol.registerStreamProtocol(name, (request, callback) => {
+        let requestPath = path.join(dir, request.url.substring(name.length + 3));
 
-        callback({
-            statusCode: 200,
-            headers: {
-                "content-type": "text/html"
-            },
-            data: fs.createReadStream("")
-        })
+        if (!fs.existsSync(requestPath)) {
+            callback({
+                statusCode: 404,
+                data: "File not found."
+            });
+            return
+        }
+
+        // TODO: Implement a proper directory check
+        try {
+            const dirents = fs.readdirSync(requestPath);
+            callback({
+                statusCode: 200,
+                headers: {
+                    "x-type": "dir",
+                    "content-type": "application/json",
+                },
+                data: JSON.stringify(dirents)
+            });
+        } catch {
+            try {
+                let fileExt = path.parse(requestPath).ext;
+                let fileType = extensions[fileExt as keyof typeof extensions];
+
+                callback({
+                    statusCode: 200,
+                    headers: {
+                        "x-type": "file",
+                        "content-type": fileType
+                    },
+                    data: fs.createReadStream(requestPath)
+                });
+            } catch (err) {
+                callback({
+                    // Internal Sever Error
+                    statusCode: 500,
+                    data: Buffer.from(JSON.stringify(serializeError(err)))
+                })
+            }
+        }
     })
 }

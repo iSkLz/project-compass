@@ -3,7 +3,7 @@
     "enable": false
   },
   "include": [
-    "src/**/*.ts"
+    "src/**/*.tsx"
   ],
   "exclude": [
     "./lib/**/*",
@@ -11,9 +11,8 @@
   ],
   "compilerOptions": {
     "target": "es2015",
-    //"module": "commonjs",
     "module": "es2015",
-    "moduleResolution": "node",
+    "jsx": "react",
     "allowJs": true,
     "sourceMap": true,
     "declaration": true,

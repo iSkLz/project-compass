@@ -6,7 +6,8 @@ export default class Config {
     // A static member to keep track of all current Config instances
     public static Instances: WeakSet<Config> = new WeakSet<Config>();
 
-    private root: string;
+    public root: string;
+    
     private config: Map<string, any>;
 
     constructor(folder: string) {
@@ -38,11 +39,15 @@ export default class Config {
             }
         }
 
+        // Mkdir -P
+        if (!fs.existsSync(this.root)) fs.mkdirSync(this.root, {
+            recursive: true
+        });
         recurse(this.root);
     }
 
     /**
-     * Saves the current Config to the filesystem
+     * Saves the current Config to the filesystem.
      * Compass automatically calls this when needed
      */
     public save(): void {

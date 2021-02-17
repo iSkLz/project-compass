@@ -9,20 +9,6 @@ export interface ModuleInfo {
     path: string;
 }
 
-/**
- * A list of available namespaces
- */
-export const enum ModuleNamespaces {
-    /**
-     * Gives modules a simple tool to store and load configurations
-     */
-    Config,
-    /**
-     * Allows modules to query about each other
-     */
-    Registery
-}
-
 export default class Module {
     public info: ModuleInfo;
 
@@ -31,23 +17,13 @@ export default class Module {
      */
     public plugins: Plugin[] = [];
 
+    public config: Config;
+
     constructor(info: ModuleInfo, lib: any = null) {
         this.info = info;
+        this.config = new Config(info.path);
 
         Registery.register(this, lib);
-    }
-
-    /**
-     * Retrieves a specific namespace
-     * @param namespace The namespace ID to retrieve
-     */
-    public getNamespace(namespace: ModuleNamespaces): Config | typeof Registery {
-        switch (namespace) {
-            case ModuleNamespaces.Registery:
-                return Registery;
-            default:
-                return new Config(this.info.ID);
-        }
     }
 
     /**

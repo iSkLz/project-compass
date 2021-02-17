@@ -1,17 +1,23 @@
 import Config from "./config.js";
 import LogHelper from "../helpers/log.js";
+import PathHelper from "../helpers/paths.js";
 import { execFile } from "child_process";
+
+import path from "path";
+import UIWindow, { NodeState, ShowMode, WindowState } from "./ui/ui.js";
 
 interface CoreConfig {
     firstLaunch: boolean;
     celestePath: string;
+    ahornPath: string;
     debug: boolean;
 }
 
 const defaultConfig: CoreConfig = {
     firstLaunch: true,
     celestePath: "",
-    debug: false
+    ahornPath: "",
+    debug: true
 };
 
 export default class Core {
@@ -29,19 +35,50 @@ export default class Core {
     public init() {
         if (this.mainConfig.firstLaunch) {
             this.firstLaunch();
-
-            this.mainConfig.firstLaunch = false;
-            this.config.save();
-
-            // Restart
-            let args = process.argv;
-            args.shift();
-            execFile(process.execPath, args);
-            process.abort();
+        } else {
+            // TODO: Implement normal startup code
         }
     }
 
+    public restart() {
+        let args = process.argv;
+        args.shift();
+        execFile(process.execPath, args);
+        this.shutdown();
+    }
+
+    public shutdown() {
+        this.config.save();
+        process.abort();
+    }
+
     public firstLaunch() {
-        
+        this.mainConfig.firstLaunch = false;
+
+        let UI = new UIWindow({
+            width: 800,
+            height: 800
+        },
+        {
+            defaultTitle: "Celestial Compass - First Launch",
+            state: WindowState.maximized,
+            icon: "compass.png",
+            frameless: false,
+            show: ShowMode.whenReady,
+            alwaysOnTop: false,
+            showInTaskbar: true,
+            parent: undefined,
+            modal: false,
+            nodeState: NodeState.enabled,
+            preload: "",
+            webview: true
+        });
+
+        UI.addConfig("main", this.config);
+        UI.serveContent(PathHelper.fromRoot("web/firstLaunch"))("index.html");
+
+        UI.on("ipcAsync", (event, req) => {
+            if (req.finished) this.restart();
+        });
     }
 }

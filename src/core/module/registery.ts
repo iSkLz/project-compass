@@ -35,7 +35,7 @@ class ModulesRegistery {
     }
 
     /**
-     * Registers a module and optionally a library
+     * Registers a module and optionally a library.
      * Compass automatically calls this when needed
      * @param module The module to register
      * @param lib The library associated with the module
@@ -48,12 +48,18 @@ class ModulesRegistery {
     /**
      * Sends a plugin request
      * @param plugin The plugin object
+     * @returns True if the target module received the plugin request correctly, an error otherwise
      */
     public sendPlugin(plugin: Plugin) {
-        const target = this.getModule(plugin.to);
-        const res = target.onPlugin(plugin);
-        if (res) plugin.onAccept(plugin);
-        else plugin.onDenial(plugin);
+        try {
+            const target = this.getModule(plugin.to);
+            const res = target.onPlugin(plugin);
+            if (res) plugin.onAccept(plugin);
+            else plugin.onDenial(plugin);
+            return true;
+        } catch (err) {
+            return err as Error;
+        }
     }
 }
 
