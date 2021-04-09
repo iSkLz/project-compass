@@ -3,25 +3,26 @@
     "enable": false
   },
   "include": [
-    "src/**/*.ts"
+    "./src/**/*.ts"
   ],
   "exclude": [
-    "./lib/**/*",
-    "./node_modules"
+    "./src/**/*.tsx"
   ],
   "compilerOptions": {
     "target": "es2015",
-    //"module": "commonjs",
-    "module": "es2015",
+    "module": "commonjs",
     "moduleResolution": "node",
-    "allowJs": true,
     "sourceMap": true,
     "declaration": true,
-    "outDir": "./out",
+    "outDir": "./build",
     "rootDir": "./src",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+
+    "lib": [
+      "ES5", "ES6"
+    ]
   }
 }
