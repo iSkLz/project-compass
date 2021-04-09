@@ -13,6 +13,7 @@ class PathsHelper {
     public root: string;
     public save: string;
     public data: string;
+    public web: string;
 
     // Other apps
     public ahornStorage: string;
@@ -21,6 +22,7 @@ class PathsHelper {
         this.root = path.join(module.path, "..");
         this.save = path.join(this.root, "save");
         this.data = path.join(this.root, "data");
+        this.web = path.join(this.root, "web");
         if (!fs.existsSync(this.save)) fs.mkdirSync(this.save);
 
         if (OSHelper.isWindows) {

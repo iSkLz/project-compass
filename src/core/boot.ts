@@ -1,4 +1,4 @@
 import Core from "./core.js";
 import { app } from "electron";
 
-app.whenReady().then(() => new Core().init());
+app.once("ready", () => new Core().init())

@@ -41,7 +41,7 @@ export default function fileDelivery(name: string, dir: string) {
         } catch {
             try {
                 let fileExt = path.parse(requestPath).ext;
-                let fileType = extensions[fileExt as keyof typeof extensions];
+                let fileType = extensions[(fileExt.substring(1)) as keyof typeof extensions];
 
                 callback({
                     statusCode: 200,

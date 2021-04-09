@@ -2,7 +2,7 @@ import Module, { ModuleInfo } from "./module.js";
 import Plugin from "./plugin.js";
 
 class ModulesRegistery {
-    public static instance = new ModulesRegistery();
+    public static Instance = new ModulesRegistery();
 
     private modules: Map<string, Module>;
     private libs: Map<string, any>;
@@ -12,7 +12,11 @@ class ModulesRegistery {
         this.libs = new Map<string, any>();
     }
 
-    private getModule(ID: string): Module {
+    /**
+     * Gets a module object by its ID
+     * @param ID ID of the module
+     */
+    public getModule(ID: string): Module {
         const target = this.modules.get(ID);
         if (target === undefined) throw new Error("Target module doesn't exist");
         return target;
@@ -24,14 +28,6 @@ class ModulesRegistery {
      */
     public getLibrary(ID: string): any {
         return this.libs.get(ID);
-    }
-
-    /**
-     * Get the module info of a specific module
-     * @param ID ID of the module
-     */
-    public getModInfo(ID: string): ModuleInfo {
-        return this.getModule(ID).info;
     }
 
     /**
@@ -48,19 +44,23 @@ class ModulesRegistery {
     /**
      * Sends a plugin request
      * @param plugin The plugin object
-     * @returns True if the target module received the plugin request correctly, an error otherwise
-     */
+     * @returns An error if one was thrown or a boolean for whether the plugin was accepted
+    */
     public sendPlugin(plugin: Plugin) {
         try {
             const target = this.getModule(plugin.to);
             const res = target.onPlugin(plugin);
-            if (res) plugin.onAccept(plugin);
-            else plugin.onDenial(plugin);
-            return true;
+            if (res) {
+                plugin.onAccept(plugin);
+                return true;
+            } else {
+                plugin.onDenial(plugin);
+                return false;
+            }
         } catch (err) {
             return err as Error;
         }
     }
 }
 
-export default ModulesRegistery.instance;
+export default ModulesRegistery.Instance;

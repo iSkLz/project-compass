@@ -1,8 +1,10 @@
 import { BrowserWindow, NativeImage, ipcMain } from "electron";
 import EventEmitter from "events";
 import path from "path";
+import locals from "../locals.js";
 import Core from "../core.js";
 import Config from "../config.js";
+import paths from "../../helpers/paths.js";
 import fileDelivery from "../web/fileDelivery.js";
 
 export type size = {
@@ -89,7 +91,7 @@ export default class UIWindow extends EventEmitter {
 
         this.ID = ID;
         UIWindow.Instances.set(ID, this);
-
+        
         this.window = new BrowserWindow({
             width: size.width, height: size.height,
             minWidth: minSize.width, minHeight: minSize.height,
@@ -106,7 +108,9 @@ export default class UIWindow extends EventEmitter {
                 nodeIntegration: winOptions.nodeState === NodeState.enabled || winOptions.nodeState == undefined,
                 sandbox: winOptions.nodeState === NodeState.sandbox,
                 webviewTag: winOptions.webview,
-                devTools: Core.Instance.mainConfig.debug
+                devTools: Core.Instance.mainConfig.debug,
+                // This fixes errors of node scripts executed in a browser context
+                preload: paths.fromRoot("core/ui/nodefix.js")
             }
         });
         
@@ -139,13 +143,13 @@ export default class UIWindow extends EventEmitter {
 
         // Assign ID
         this.window.webContents.on("did-finish-load", () => {
-            this.window.webContents.executeJavaScript(`window.winID = ${ID}`);
+            this.window.webContents.executeJavaScript(`window.winID = "${ID}"`);
         });
 
         // Setup IPC handlers (synchronous and asynchronous)
         ipcMain.on(ID, (event, arg) => {
             let request = JSON.parse(arg);
-            if (request.winID !== this.ID) return;
+            //if (request.winID !== this.ID) return;
 
             switch (request.type) {
                 case "config":
@@ -168,13 +172,18 @@ export default class UIWindow extends EventEmitter {
 
         ipcMain.on(`${ID}-async`, (event, arg) => {
             let request = JSON.parse(arg);
-            if (request.winID !== this.ID) return;
+            //if (request.winID !== this.ID) return;
 
             switch (request.type) {
                 default:
                     this.emit("ipcAsync", event, request);
             }
         });
+
+        this.addConfig = this.addConfig.bind(this);
+        this.toggleVisibility = this.toggleVisibility.bind(this);
+        this.serveContent = this.serveContent.bind(this);
+        this.loadServed = this.loadServed.bind(this);
     }
 
     /**

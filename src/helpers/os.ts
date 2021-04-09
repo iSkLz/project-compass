@@ -5,7 +5,7 @@ export const enum OSType {
 }
 
 class OSHelper {
-    public static instance = new OSHelper();
+    public static Instance = new OSHelper();
 
     public type: OSType;
     public isWindows: boolean = false;
@@ -27,4 +27,4 @@ class OSHelper {
     }
 }
 
-export default OSHelper.instance;
+export default OSHelper.Instance;
