@@ -1,6 +1,7 @@
 module.exports = function(grunt) {
     grunt.initConfig({
         pkg: grunt.file.readJSON("package.json"),
+        
         ts: {
             default: {
                 tsconfig: "./tsconfig.json"
@@ -16,7 +17,7 @@ module.exports = function(grunt) {
                     {
                         expand: true,
                         cwd: "src",
-                        src: "html/png/json/js"
+                        src: "html/png/json/js/txt"
                             .split("/").map(ext => `**/*.${ext}`),
                         dest: "build/",
                         rename(dest, src) {
