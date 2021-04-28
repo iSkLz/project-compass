@@ -6,10 +6,16 @@
   "license": "MIT",
   "main": "out/core/boot.js",
   "scripts": {
+    "ts": "tsc",
+    "tsx": "tsc -p tsconfig-web.json",
+    "tsall": "npm run ts && npm run tsx",
     "tsw": "tsc -w",
     "tsxw": "tsc -p tsconfig-web.json -w",
-    "run": "npx electron build/core/boot.js",
-    "files": "npx grunt"
+    "launch": "npx electron build/core/boot.js",
+    "files": "npx grunt",
+    "build": "npm run ts && npm run tsx && npm run files",
+    "run": "npm run build && npm run launch",
+    "runfiles": "npm run files && npm run launch"
   },
   "devDependencies": {
     "@types/jquery": "^3.5.3",
