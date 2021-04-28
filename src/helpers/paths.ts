@@ -41,6 +41,10 @@ class PathsHelper {
     public fromRoot(relativePath: string) {
         return path.join(this.root, relativePath);
     }
+
+    public from(originPath: string, relativePath: string) {
+        return path.join(originPath, relativePath);
+    }
 }
 
 export default PathsHelper.instance;

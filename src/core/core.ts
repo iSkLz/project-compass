@@ -57,7 +57,6 @@ export default class Core {
 
     public init() {
         fileDelivery("styles", paths.fromRoot("web/styles"));
-        fileDelivery("libs", paths.fromRoot("web/libs"));
 
         if (this.mainConfig.firstLaunch) {
             this.firstLaunch();

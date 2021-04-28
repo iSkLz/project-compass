@@ -1,12 +1,18 @@
 import { BrowserWindow, NativeImage, ipcMain } from "electron";
 import EventEmitter from "events";
 import path from "path";
+import fs from "fs";
 import locals from "../locals.js";
 import Core from "../core.js";
 import Config from "../config.js";
 import paths from "../../helpers/paths.js";
 import fileDelivery from "../web/fileDelivery.js";
 
+// TODO: This is so messed up.......
+const importsScript = fs.readFileSync(paths.from(paths.data, "imports.js"), "utf8")
+    + '("' + paths.from(paths.web, "libs").replaceAll("\\", "/") + '")'; // Backslashes don't make it through IPC
+
+//#region Enums & Types
 export type size = {
     width: number, height: number
 };
@@ -20,22 +26,92 @@ export const enum NodeState {
 }
 
 export const enum ShowMode {
-    always, whenReady, never
+    /**
+     * Show immediately
+     */
+    always,
+
+    /**
+     * Show when the page has fully loaded
+     */
+    whenReady,
+
+    /**
+     * Don't show automatically
+     */
+    never
 }
 
 export interface WindowOptions {
+    /**
+     * The default title to show for the window before a page loads
+     */
     defaultTitle: string;
+
+    /**
+     * The default state of the window when showing for the first time
+     */
     state: WindowState;
+
+    /**
+     * The icon to use for the window before a page loads
+     */
     icon: NativeImage | string;
+
+    /**
+     * Whether to remove the window's frame
+     */
     frameless: boolean;
+
+    /**
+     * When to show the window
+     */
     show: ShowMode;
+
+    /**
+     * Whether to stick the window on top of all other windows in the OS
+     */
     alwaysOnTop: boolean;
+
+    /**
+     * Whether to show the window in the task bar
+     */
     showInTaskbar: boolean;
+
+    /**
+     * Parent (owner) window
+     */
     parent: BrowserWindow | undefined;
+
+    /**
+     * Whether the window has the modal system theme
+     */
     modal: boolean;
+
+    /**
+     * The type of node integration to use
+     */
     nodeState: NodeState;
+
+    /**
+     * A path to a script that will be executed before every requested page is loaded
+     */
     preload: string;
+
+    /**
+     * Whether to allow webview tags
+     */
     webview: boolean;
+
+    /**
+     * Whether to destroy the window when closed
+     */
+    destroyOnClose: boolean;
+
+    /**
+     * Whether to add the node importer script
+     */
+    nodeImporter: boolean;
 };
 
 const defaultMinSize: size = {
@@ -54,8 +130,11 @@ const defaultWinOptions: WindowOptions = {
     modal: false,
     preload: "",
     nodeState: NodeState.enabled,
-    webview: true
+    webview: true,
+    destroyOnClose: false,
+    nodeImporter: true
 };
+//#endregion
 
 // Create a digits shifting object
 const digitsShift = {
@@ -63,6 +142,7 @@ const digitsShift = {
 };
 
 function getRandomID() {
+    // 9 digits: (26 ** 9) - 1 = 5429503678975
     let num = Math.round(Math.random() * 5429503678975).toString(26).padStart(9, "0")
         .split("").map(digit => digitsShift[digit as keyof typeof digitsShift]);
     return num.join("");
@@ -84,13 +164,18 @@ export default class UIWindow extends EventEmitter {
         super();
 
         // Get a random ID that hasn't been used yet
-        let ID = getRandomID();
-        while (UIWindow.Instances.has(ID)) {
-            ID = getRandomID();
-        }
+        let ID: string;
+        while (UIWindow.Instances.has(ID = getRandomID())) {}
 
         this.ID = ID;
         UIWindow.Instances.set(ID, this);
+
+        // Assign default options
+        for (const key in defaultWinOptions) {
+            if ((winOptions as any)[key] == undefined) {
+                (winOptions as any)[key] = (defaultWinOptions as any)[key];
+            }
+        }
         
         this.window = new BrowserWindow({
             width: size.width, height: size.height,
@@ -109,16 +194,13 @@ export default class UIWindow extends EventEmitter {
                 sandbox: winOptions.nodeState === NodeState.sandbox,
                 webviewTag: winOptions.webview,
                 devTools: Core.Instance.mainConfig.debug,
-                // This fixes errors of node scripts executed in a browser context
-                preload: paths.fromRoot("core/ui/nodefix.js")
+                preload: winOptions.preload,
+                contextIsolation: false
             }
         });
         
-        this.window.on("closed", () => {
-            // Using this means this.window's type has to include null
-            // Which makes it very annoying to retrieve properties from it
-            // FIXME: Dereference the window without adding null to the type
-            //this.window = null;
+        if (winOptions.destroyOnClose) this.window.on("closed", () => {
+            (this.window as any) = null;
             UIWindow.Instances.delete(this.ID);
         });
 
@@ -144,12 +226,12 @@ export default class UIWindow extends EventEmitter {
         // Assign ID
         this.window.webContents.on("did-finish-load", () => {
             this.window.webContents.executeJavaScript(`window.winID = "${ID}"`);
+            if (winOptions.nodeImporter) this.window.webContents.executeJavaScript(importsScript);
         });
 
         // Setup IPC handlers (synchronous and asynchronous)
         ipcMain.on(ID, (event, arg) => {
             let request = JSON.parse(arg);
-            //if (request.winID !== this.ID) return;
 
             switch (request.type) {
                 case "config":
@@ -172,7 +254,6 @@ export default class UIWindow extends EventEmitter {
 
         ipcMain.on(`${ID}-async`, (event, arg) => {
             let request = JSON.parse(arg);
-            //if (request.winID !== this.ID) return;
 
             switch (request.type) {
                 default:

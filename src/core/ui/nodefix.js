@@ -1,2 +1,0 @@
-window.module = {};
-window.exports = {};
