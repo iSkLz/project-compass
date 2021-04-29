@@ -1,4 +1,22 @@
+@import "./themes/dark-blue.scss";
+
 body {
-    background-color: #121212;
-    color: white;
+    background-color: var(--page-background);
+    color: var(--page-text);
+    margin: 0;
+
+    font-family: system-ui, "Segoe UI", Tahoma, sans-serif;
+}
+
+.title {
+    color: var(--color-text);
+}
+
+.center {
+    text-align: center;
+}
+
+.vcenter {
+    margin-top: 50vh;
+    transform: translate(0, -50%);
 }

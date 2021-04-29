@@ -1,14 +1,26 @@
 <!DOCTYPE html>
 
 <html>
-    <head>
+    <head locals-path="core/firstlaunch">
         <title>Celestial Compass - First Launch</title>
+
+        <link rel="stylesheet" href="styles://main.css" />
 
         <script lib data="default" src="config.js" as="config"></script>
         <script lib src="locals.js"></script>
     </head>
 
-    <body>
-        <local path="core/firstlaunch" key="welcome" />
+    <body class="center vcenter">
+        <div style="display: none">
+            <h1 class="title"><local key="step0_title" /></h1>
+            <h3><local key="step0" /></h3>
+        </div>
+
+        <script>
+            const $ = require("jquery");
+            window.addEventListener("loaded-locals", function() {
+                setTimeout(() => $("div").fadeIn(1000), 500)
+            });
+        </script>
     </body>
 </html>

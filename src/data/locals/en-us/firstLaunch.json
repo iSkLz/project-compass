@@ -1,4 +1,38 @@
 {
     "_path": "core/firstlaunch",
-    "welcome": "It looks like this is your first time using Celestial Compass.\nTo start things off, we need to configure some stuff."
+    "step0_title": "Welcome!",
+    "step0": "It looks like this is your first time using Celestial Compass.\nTo start things off, we need to configure some stuff.",
+
+    "step1_title": "Language",
+    "step1": "Set your preferred language.",
+
+    "step2_title": "Usage",
+    "step2": "Would you like Compass to attempt configuring everything automatically?\nYou can still change settings that you see not fit before they are committed.",
+    "step2_yes": "Yes, gather settings automatically",
+    "step2_no": "No, let me configure everything manually",
+
+    "step3_title": "Celeste",
+    "step3": "Set your game's location.\nAlthough this step is optional, most of the app is useless without it.",
+    "step3_steam": "Auto-detect Steam installation",
+    "step3_epic": "Auto-detect Epic Games installation",
+    "step3_ahorn": "Auto-detect Ahorn installation",
+    "step3_manual": "Manually locate the game",
+    "step3_skip": "Are you sure you want to proceed without locating the game?",
+
+    "step3-2_title": "Everest",
+    "step3-2": "It looks like the game you've located is a vanilla installation of the game.\nFor modding the game, you would ideally want to have the modding framework Everest installed.",
+    "step3-2_install": "Auto-install Everest",
+    "step3-2_skip": "Are you sure you want to proceed without installing Everest?",
+
+    "step4_title": "Theme",
+    "step4": "Set the theme you like the most.",
+    "step4_dark": "Dark",
+    "step4_light": "Light",
+    "step4_blue": "Blue",
+    "step4_preview": "Preview",
+
+    "step5_title": "Done!",
+    "step5": "Compass is now ready to launch!",
+    "step5_yes": "Launch",
+    "step5_no": "Later"
 }
