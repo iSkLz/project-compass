@@ -37,7 +37,7 @@ module.exports = function(grunt) {
                         src: "**/*.lib.scss",
                         dest: "build/",
                         rename(dest, src) {
-                            return dest + src.replace("lib.scss", "scss");
+                            return dest + src.replace("lib.scss", "css");
                         }
                     }
                 ]
