@@ -1,4 +1,4 @@
-import { BrowserWindow, NativeImage, ipcMain } from "electron";
+import { BrowserWindow, NativeImage, ipcMain, Menu } from "electron";
 import EventEmitter from "events";
 import path from "path";
 import fs from "fs";
@@ -18,11 +18,52 @@ export type size = {
 };
 
 export const enum WindowState {
-    normal, maximized, fullscreen
+    /**
+     * Start the window in the OS's default state
+     */
+    normal,
+    /**
+     * Start the window maximized
+     */
+    maximized,
+    /**
+     * Start the window in fullscreen mode
+     */
+    fullscreen
+}
+
+export const enum MenuState {
+    /**
+     * Show the menu bar normally
+     */
+    shown,
+    /**
+     * Hide the menu bar but allow it to be brought up when Alt is pressed
+     */
+    autoHide,
+    /**
+     * Hide the menu bar completely (while still keeping accelerators from it)
+     */
+    hidden,
+    /**
+     * Remove the menu bar altogether
+     */
+    removed
 }
 
 export const enum NodeState {
-    enabled, disabled, sandbox
+    /**
+     * Enable node integration
+     */
+    enabled,
+    /**
+     * Disable node integration
+     */
+    disabled,
+    /**
+     * Disable node integration and enable sandbox mode
+     */
+    sandbox
 }
 
 export const enum ShowMode {
@@ -35,6 +76,11 @@ export const enum ShowMode {
      * Show when the page has fully loaded
      */
     whenReady,
+
+    /**
+     * Setup an IPC handler which the page can call to show itself
+     */
+    programmatically,
 
     /**
      * Don't show automatically
@@ -112,8 +158,20 @@ export interface WindowOptions {
      * Whether to add the node importer script
      */
     nodeImporter: boolean;
-};
+    
+    /**
+     * The menu bar to use for the window, null for nothing
+     */
+    menuBar: Menu | null;
 
+    /**
+     * Visibility state of the menu bar
+     */
+    menuBarState: MenuState;
+};
+//#endregion
+
+//#region Default Options
 const defaultMinSize: size = {
     width: 100, height: 100
 }
@@ -132,7 +190,9 @@ const defaultWinOptions: WindowOptions = {
     nodeState: NodeState.enabled,
     webview: true,
     destroyOnClose: false,
-    nodeImporter: true
+    nodeImporter: true,
+    menuBar: null,
+    menuBarState: MenuState.hidden
 };
 //#endregion
 
@@ -171,35 +231,54 @@ export default class UIWindow extends EventEmitter {
         UIWindow.Instances.set(ID, this);
 
         // Assign default options
+        let options: WindowOptions = (winOptions as WindowOptions);
         for (const key in defaultWinOptions) {
-            if ((winOptions as any)[key] == undefined) {
-                (winOptions as any)[key] = (defaultWinOptions as any)[key];
+            if ((options as any)[key] == undefined) {
+                (options as any)[key] = (defaultWinOptions as any)[key];
             }
         }
         
         this.window = new BrowserWindow({
             width: size.width, height: size.height,
             minWidth: minSize.width, minHeight: minSize.height,
-            title: winOptions.defaultTitle || defaultWinOptions.defaultTitle,
-            icon: winOptions.icon || defaultWinOptions.icon,
-            fullscreen: winOptions.state === WindowState.fullscreen,
-            frame: !winOptions.frameless,
-            show: winOptions.show === ShowMode.always,
-            alwaysOnTop: winOptions.alwaysOnTop,
-            skipTaskbar: !winOptions.showInTaskbar,
-            parent: winOptions.parent,
-            modal: winOptions.modal,
+            title: options.defaultTitle || defaultWinOptions.defaultTitle,
+            icon: options.icon || defaultWinOptions.icon,
+            fullscreen: options.state === WindowState.fullscreen,
+            frame: !options.frameless,
+            show: options.show === ShowMode.always,
+            alwaysOnTop: options.alwaysOnTop,
+            skipTaskbar: !options.showInTaskbar,
+            parent: options.parent,
+            modal: options.modal,
             webPreferences: {
-                nodeIntegration: winOptions.nodeState === NodeState.enabled || winOptions.nodeState == undefined,
-                sandbox: winOptions.nodeState === NodeState.sandbox,
-                webviewTag: winOptions.webview,
+                nodeIntegration: options.nodeState === NodeState.enabled || options.nodeState == undefined,
+                sandbox: options.nodeState === NodeState.sandbox,
+                webviewTag: options.webview,
                 devTools: Core.Instance.mainConfig.debug,
-                preload: winOptions.preload,
+                preload: options.preload,
                 contextIsolation: false
             }
         });
+
+        // Assign the menu bar if one is specified
+        if (options.menuBar != null) this.window.setMenu(options.menuBar);
+        // Set its visibility state
+        switch (options.menuBarState) {
+            case MenuState.autoHide:
+                this.window.autoHideMenuBar = true;
+                this.window.setMenuBarVisibility(false);
+                break;
+            case MenuState.hidden:
+                this.window.setMenuBarVisibility(false);
+                break;
+            case MenuState.removed:
+                this.window.removeMenu();
+                break;
+        }
         
-        if (winOptions.destroyOnClose) this.window.on("closed", () => {
+        //#region Window State
+        // When closed, dereference the window and unlist from static instances array
+        if (options.destroyOnClose) this.window.on("closed", () => {
             (this.window as any) = null;
             UIWindow.Instances.delete(this.ID);
         });
@@ -208,8 +287,8 @@ export default class UIWindow extends EventEmitter {
         this.window.on("show", () => this.visible = true);
         this.window.on("hide", () => this.visible = false);
 
-        // Auto-show
-        if (winOptions.show === ShowMode.whenReady) this.window.once("ready-to-show", () => {
+        // Auto-show, once
+        if (options.show === ShowMode.whenReady) this.window.once("ready-to-show", () => {
             this.emit("autoShow", false);
             this.window.show();
             this.emit("autoShow", true);
@@ -217,39 +296,66 @@ export default class UIWindow extends EventEmitter {
 
         // Auto-maximize, once
         this.window.once("show", () => {
-            switch (winOptions.state) {
+            switch (options.state) {
                 case WindowState.maximized:
                     this.window.maximize();
             }
         });
+        //#endregion
 
-        // Assign ID
+        // Assign ID, and node importer script (if enabled)
         this.window.webContents.on("did-finish-load", () => {
             this.window.webContents.executeJavaScript(`window.winID = "${ID}"`);
-            if (winOptions.nodeImporter) this.window.webContents.executeJavaScript(importsScript);
+            if (options.nodeImporter) this.window.webContents.executeJavaScript(importsScript);
         });
 
-        // Setup IPC handlers (synchronous and asynchronous)
-        ipcMain.on(ID, (event, arg) => {
+        //#region IPC Handlers
+        // IPC show once
+        this.once("ipcSync", (request) => {
+            if (request.type == "show") {
+                this.emit("autoShow", false);
+                this.window.show();
+                this.emit("autoShow", true);
+                return true;
+            }
+        });
+
+        let handleConfig = (request: any) => {
+            const reqID = request.id;
+
+            if (request.value) {
+                this.configs.get(reqID)?.set(request.path, JSON.parse(request.value));
+                return null;
+            } else {
+                return this.configs.get(reqID)?.get<any>(request.path, null);
+            }
+        };
+
+        this.on("ipcSync", handleConfig);
+        this.on("ipcInvoke", handleConfig);
+
+        let handleIPC = (arg: any, channel: string) => {
             let request = JSON.parse(arg);
 
-            switch (request.type) {
-                case "config":
-                    const reqID = request.id;
-                    if (request.value) this.configs.get(reqID)?.set(request.path, JSON.parse(request.value));
-                    else event.returnValue = this.configs.get(reqID)?.get<any>(request.path, null);
-                default:
-                    // Use the first event handler that doesn't return undefined
-                    const handlers = this.rawListeners("ipcSync");
-                    let res = undefined;
+            // Use the first event handler that doesn't return undefined
+            const handlers = this.rawListeners(`ipc${channel}`);
+            let res = undefined;
 
-                    for (let i = 0; i < handlers.length; i++) {
-                        res = handlers[i](request);
-                        if (res !== undefined) break;
-                    }
-
-                    event.returnValue = res;
+            for (let i = 0; i < handlers.length; i++) {
+                res = handlers[i](request);
+                if (res !== undefined) break;
             }
+
+            return res;
+        }
+
+        // Setup IPC handlers (synchronous and asynchronous and... invokeronous?)
+        ipcMain.on(ID, (event, arg) => {
+            event.returnValue = handleIPC(arg, "Sync");
+        });
+
+        ipcMain.handle(`${ID}-invoke`, (_event, arg) => {
+            return handleIPC(arg, "Invoke");
         });
 
         ipcMain.on(`${ID}-async`, (event, arg) => {
@@ -260,7 +366,9 @@ export default class UIWindow extends EventEmitter {
                     this.emit("ipcAsync", event, request);
             }
         });
+        //#endregion
 
+        // Bind functions to this (so they can access it consistently from all calling contexts)
         this.addConfig = this.addConfig.bind(this);
         this.toggleVisibility = this.toggleVisibility.bind(this);
         this.serveContent = this.serveContent.bind(this);
