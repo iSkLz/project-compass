@@ -1,5 +1,6 @@
 import { ipcRenderer } from "electron";
 
+// TODO: Cache, Async, Unclass
 class ConfigLib {
     public static Instance: ConfigLib = new ConfigLib();
 
