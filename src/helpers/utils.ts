@@ -118,6 +118,19 @@ class Utils {
 
         return obj;
     }
+
+    public objectToMap<K, V>(obj: any): Map<K, V> {
+        const map = new Map<K, V>();
+        if (typeof obj === "string") obj = JSON.parse(obj);
+
+        for (const key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                map.set((key as any), obj[key]);
+            }
+        }
+
+        return map;
+    }
 }
 
 export default Utils.Instance;
