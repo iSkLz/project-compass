@@ -1,5 +1,6 @@
 import fs from "fs";
 import { ipcMain } from "electron";
+import utils from "../helpers/utils.js";
 
 class LocalsManager {
     public static Instance: LocalsManager = new LocalsManager();
@@ -54,17 +55,54 @@ class LocalsManager {
         for (const key in content) {
             dict.set(key, content[key]);
         }
+
+        // Recursive algorithm to replace embedded local references
+        let fixLocal = (key: string): string => {
+            const value = dict?.get(key) || "";
+
+            const newvalue = value.replaceAll(/\{(\w+)\}/g, (_match, subkey) => {
+                return fixLocal(subkey);
+            });
+
+            dict?.set(key, newvalue);
+            return newvalue;
+        };
+        
+        // Because it's not always a tree we need to iterate every local
+        // Already fixed locals will be skipped since the regex in the function won't find anything
+        for (const kvp of dict) {
+            fixLocal(kvp[0]);
+        }
     }
 }
 
-ipcMain.on("local", (event, arg) => {
+//#region IPC Handlers
+function handleIPC(event: any, arg: any): string {
     let request = JSON.parse(arg);
 
     const path = request.path;
-    const key = request.key;
+    switch (request.type) {
+        case "path":
+            const content = LocalsManager.Instance.activeLanguage?.get(path);
+            if (content != undefined)
+                return JSON.stringify(utils.mapToObject(content));
+        case "key":
+            const key = request.key;
+            const local = LocalsManager.Instance.activeLanguage?.get(path)?.get(key);
+            if (local != undefined)
+                return local;
+    }
     
-    // TODO: Try/Catch and return proper error
-    event.returnValue = LocalsManager.Instance.activeLanguage?.get(path)?.get(key)?.replace(/\\n/g, "<br>");
+    return JSON.stringify({});
+}
+
+ipcMain.on("local", (event, arg) => {
+    event.returnValue = handleIPC(event, arg);
 });
+
+ipcMain.handle("local", async (event, arg) => {
+    return handleIPC(event, arg);
+});
+//#endregion
 
 export default LocalsManager.Instance;
