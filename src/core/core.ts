@@ -8,6 +8,7 @@ import { execFile } from "child_process";
 import path from "path";
 import UIWindow, { NodeState, ShowMode, WindowState } from "./ui/ui.js";
 import fileDelivery from "./web/fileDelivery.js";
+import { app } from "electron/main";
 
 interface CoreConfig {
     firstLaunch: boolean;
@@ -66,15 +67,13 @@ export default class Core {
     }
 
     public restart() {
-        let args = process.argv;
-        args.shift();
-        execFile(process.execPath, args);
+        app.relaunch();
         this.shutdown();
     }
 
     public shutdown() {
         this.config.save();
-        process.abort();
+        app.quit();
     }
 
     public firstLaunch() {
