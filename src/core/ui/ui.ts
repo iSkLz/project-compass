@@ -323,11 +323,17 @@ export default class UIWindow extends EventEmitter {
         let handleConfig = (request: any) => {
             const reqID = request.id;
 
-            if (request.value) {
-                this.configs.get(reqID)?.set(request.path, JSON.parse(request.value));
-                return null;
+            if (request.value != undefined) {
+                let value = JSON.parse(request.value);
+
+                if (request.override != undefined)
+                    this.configs.get(reqID)?.merge(request.path, value, request.override);
+                else
+                    this.configs.get(reqID)?.set(request.path, value);
+
+                return "true";
             } else {
-                return this.configs.get(reqID)?.get<any>(request.path, null);
+                return JSON.stringify(this.configs.get(reqID)?.get<any>(request.path, null));
             }
         };
 
