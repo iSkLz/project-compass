@@ -1,10 +1,10 @@
 {
   "name": "celestialcompass",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A highly extensible IME for Celeste and Everest",
   "author": "SkLz",
   "license": "MIT",
-  "main": "out/core/boot.js",
+  "main": "build/core/boot.js",
   "scripts": {
     "ts": "tsc",
     "tsx": "tsc -p tsconfig-web.json",
@@ -15,9 +15,17 @@
     "files": "npx grunt",
     "build": "npm run ts && npm run tsx && npm run files",
     "run": "npm run build && npm run launch",
-    "runfiles": "npm run files && npm run launch"
+    "runfiles": "npm run files && npm run launch",
+    "forgestart": "electron-forge start",
+    "forgepackage": "electron-forge package",
+    "forgemake": "electron-forge make"
   },
   "devDependencies": {
+    "@electron-forge/cli": "^6.0.0-beta.54",
+    "@electron-forge/maker-deb": "^6.0.0-beta.54",
+    "@electron-forge/maker-rpm": "^6.0.0-beta.54",
+    "@electron-forge/maker-squirrel": "^6.0.0-beta.54",
+    "@electron-forge/maker-zip": "^6.0.0-beta.54",
     "@types/jquery": "^3.5.3",
     "@types/materialize-css": "^1.0.8",
     "@types/react": "^16.9.53",
@@ -32,6 +40,7 @@
     "typescript": "^4.0.3"
   },
   "dependencies": {
+    "electron-squirrel-startup": "^1.0.0",
     "golden-layout": "^2.0.2",
     "grunt-contrib-htmlmin": "^3.1.0",
     "grunt-contrib-sass": "^2.0.0",
@@ -42,5 +51,32 @@
     "sass": "^1.27.0",
     "semver": "^7.3.4",
     "ws": "^7.4.3"
+  },
+  "config": {
+    "forge": {
+      "packagerConfig": {},
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "name": "celestialcompass"
+          }
+        },
+        {
+          "name": "@electron-forge/maker-zip",
+          "platforms": [
+            "windows", "darwin"
+          ]
+        },
+        {
+          "name": "@electron-forge/maker-deb",
+          "config": {}
+        },
+        {
+          "name": "@electron-forge/maker-rpm",
+          "config": {}
+        }
+      ]
+    }
   }
 }
