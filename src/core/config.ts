@@ -35,7 +35,16 @@ export default class Config {
                 const storePath = path.relative(this.root, filePath);
                 
                 // Read the file as JSON, and store it
-                this.config.set(storePath, JSON.parse(fs.readFileSync(filePath, "utf8")));
+                let content: any;
+                
+                try {
+                    content = JSON.parse(fs.readFileSync(filePath, "utf8"));
+                } catch {
+                    // TODO: Maybe we can detect & attempt to fix invalid JSON?
+                    content = {};
+                }
+
+                this.config.set(storePath, content);
             }
         }
 
