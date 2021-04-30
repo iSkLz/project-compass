@@ -1,0 +1,25 @@
+@for $size from 0 to 160 {
+    @if $size != 0 {
+        .text-#{$size} {
+            font-size: #{$size}#{px};
+        }
+    }
+
+    @if $size <= 100 {
+        .width-#{$size} {
+            width: percentage($size / 100);
+        }
+        
+        .height-#{$size} {
+            height: percentage($size / 100);
+        }
+
+        .vwidth-#{$size} {
+            width: #{$size}#{vh};
+        }
+
+        .vheight-#{$size} {
+            height: #{$size}#{vh};
+        }
+    }
+}
