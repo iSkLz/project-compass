@@ -7,6 +7,8 @@ import Core from "../core.js";
 import Config from "../config.js";
 import paths from "../../helpers/paths.js";
 import fileDelivery from "../web/fileDelivery.js";
+import os from "../../helpers/os.js";
+import { app } from "electron/main";
 
 // TODO: This is so messed up.......
 const importsScript = fs.readFileSync(paths.from(paths.data, "imports.js"), "utf8")
@@ -279,8 +281,7 @@ export default class UIWindow extends EventEmitter {
         //#region Window State
         // When closed, dereference the window and unlist from static instances array
         if (options.destroyOnClose) this.window.on("closed", () => {
-            (this.window as any) = null;
-            UIWindow.Instances.delete(this.ID);
+            this.destroy();
         });
 
         // Track visibility
@@ -379,6 +380,12 @@ export default class UIWindow extends EventEmitter {
         this.toggleVisibility = this.toggleVisibility.bind(this);
         this.serveContent = this.serveContent.bind(this);
         this.loadServed = this.loadServed.bind(this);
+        this.destroy = this.destroy.bind(this);
+    }
+
+    public destroy() {
+        (this.window as any) = null;
+        UIWindow.Instances.delete(this.ID);
     }
 
     /**

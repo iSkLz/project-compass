@@ -1,6 +1,13 @@
 import Core from "./core.js";
 import { app } from "electron";
 import { serializeError } from "serialize-error";
+import os from "../helpers/os.js";
+
+// TODO: Tray
+
+app.on("window-all-closed", () => {
+    if (!os.isMac) app.quit();
+})
 
 app.once("ready", () => {
     try {
