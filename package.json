@@ -2,7 +2,9 @@
   "name": "celestialcompass",
   "version": "0.0.4",
   "description": "A highly extensible IME for Celeste and Everest",
-  "author": "SkLz",
+  "author": {
+    "name": "SkLz"
+  },
   "license": "MIT",
   "main": "build/core/boot.js",
   "scripts": {
@@ -16,9 +18,18 @@
     "build": "npm run ts && npm run tsx && npm run files",
     "run": "npm run build && npm run launch",
     "runfiles": "npm run files && npm run launch",
-    "forgestart": "electron-forge start",
-    "forgepackage": "electron-forge package",
-    "forgemake": "electron-forge make"
+    "packagewin64": "electron-forge package -p win32 -a x64",
+    "packagewin86": "electron-forge package -p win32 -a ia32",
+    "packagelinux": "electron-forge package -p linux -a x64",
+    "packagemac": "electron-forge package -p darwin -a x64",
+    "packagewin": "npm run packagewin64 && npm run packagewin86",
+    "package": "npm run packagewin && npm run packagelinux && npm run packagemac",
+    "makewin64": "electron-forge make -p win32 -a x64 --skip-package",
+    "makewin32": "electron-forge make -p win32 -a ia32 --skip-package",
+    "makewin": "npm run makewin64 && npm run makewin32",
+    "makelinux": "electron-forge make -p linux -a x64 --skip-package",
+    "makemac": "electron-forge make -p darwin -a x64 --skip-package",
+    "make": "npm run makewin && npm run makelinux && npm run makemac"
   },
   "devDependencies": {
     "@electron-forge/cli": "^6.0.0-beta.54",
@@ -37,43 +48,40 @@
     "grunt-ts": "^6.0.0-beta.22",
     "grunt-webpack": "^4.0.2",
     "sass-loader": "^11.0.1",
+    "grunt-contrib-htmlmin": "^3.1.0",
+    "grunt-contrib-sass": "^2.0.0",
     "typescript": "^4.0.3"
   },
   "dependencies": {
     "electron-squirrel-startup": "^1.0.0",
     "golden-layout": "^2.0.2",
-    "grunt-contrib-htmlmin": "^3.1.0",
-    "grunt-contrib-sass": "^2.0.0",
     "jquery": "^3.5.1",
     "materialize-css": "^1.0.0-rc.2",
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
     "sass": "^1.27.0",
     "semver": "^7.3.4",
-    "ws": "^7.4.3"
+    "ws": "^7.4.3",
+    "serialize-error": "^7.0.1"
   },
   "config": {
     "forge": {
-      "packagerConfig": {},
+      "packagerConfig": {
+
+      },
       "makers": [
         {
           "name": "@electron-forge/maker-squirrel",
           "config": {
-            "name": "celestialcompass"
+            "name": "CelestialCompass",
+            "title": "Celestial Compass"
           }
         },
         {
-          "name": "@electron-forge/maker-zip",
-          "platforms": [
-            "windows", "darwin"
-          ]
+          "name": "@electron-forge/maker-zip"
         },
         {
           "name": "@electron-forge/maker-deb",
-          "config": {}
-        },
-        {
-          "name": "@electron-forge/maker-rpm",
           "config": {}
         }
       ]
