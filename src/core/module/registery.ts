@@ -13,6 +13,13 @@ class ModulesRegistery {
     }
 
     /**
+     * Returns an iterable list of all existing modules and their corresponding IDs
+     */
+    public getAllModules() {
+        return this.modules.entries();
+    }
+
+    /**
      * Gets a module object by its ID
      * @param ID ID of the module
      */

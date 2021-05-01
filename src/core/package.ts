@@ -48,8 +48,9 @@ class PackageManager {
                 fileDelivery
             };
 
-            const entry: (arg: typeof helper) => void = require(path.join(moduleInfo.path, "main.js"));
-            entry(helper);
+            moduleInfo.packageID = pkg.ID;
+            const entry: (arg: typeof helper, info: ModuleInfo) => void = require(path.join(moduleInfo.path, "main.js"));
+            entry(helper, moduleInfo);
         });
 
         if (fs.existsSync(localsDir)) {
@@ -62,7 +63,7 @@ class PackageManager {
                 utils.recurseScan(dir, true, ScanOptions.all,
                     (file) => file.endsWith(".json")).forEach((localPath) => {
                         const fullPath = path.join(localsDir, dir, localPath);
-                        const defaultPath = path.join(pkg.ID, localPath.substring(0, localPath.length - 5));
+                        const defaultPath = pkg.ID + "/" + localPath.substring(0, localPath.length - 5);
         
                         // Directory's name is the language ID
                         locals.load(langID, fullPath, defaultPath);

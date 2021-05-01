@@ -46,7 +46,7 @@ export default class Core {
                 (file) => file.endsWith(".json")).forEach((localPath) => {
                     const fullPath = path.join(dir, localPath);
                     // Directory's name is the language ID
-                    locals.load(langID, fullPath, path.join("core", localPath));
+                    locals.load(langID, fullPath, "core/" + localPath);
                 }
             );
 
@@ -57,7 +57,8 @@ export default class Core {
     }
 
     public init() {
-        fileDelivery("styles", paths.fromRoot("web/styles"));
+        fileDelivery("styles", paths.from(paths.web, "styles"));
+        fileDelivery("pics", paths.pics);
 
         if (this.mainConfig.firstLaunch) {
             this.firstLaunch();

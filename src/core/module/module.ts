@@ -4,6 +4,7 @@ import Plugin from "./plugin.js";
 import Project from "../project/project.js";
 
 export interface ModuleInfo {
+    packageID: string;
     ID: string;
     displayName: string;
     author: string;
