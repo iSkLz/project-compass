@@ -1,22 +1,23 @@
-@import "./themes/dark-blue.scss";
+@import "./positions.scss";
+@import "./sizes.scss";
+@import "./spacing.scss";
+@import "./themes/exports.scss";
 
 body {
     background-color: var(--page-background);
     color: var(--page-text);
     margin: 0;
 
-    font-family: system-ui, "Segoe UI", Tahoma, sans-serif;
+    font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, Roboto, Oxygen, Ubuntu, Tahoma, "Open Sans", Arial, sans-serif;
+    font-weight: 300;
 }
 
-.title {
-    color: var(--color-text);
-}
+@for $i from 1 to 7 {
+    h#{$i} {
+        font-size: #{4.5 - $i/2}#{em};
+        font-weight: 400;
+        margin-bottom: 0.4em;
 
-.center {
-    text-align: center;
-}
-
-.vcenter {
-    margin-top: 50vh;
-    transform: translate(0, -50%);
+        @extend .theme-accent-color
+    }
 }

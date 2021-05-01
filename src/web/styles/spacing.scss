@@ -1,0 +1,35 @@
+.no-padding {
+    padding: 0px !important;
+}
+
+@for $i from 0 to 300 {
+    .padding-#{$i} {
+        padding: #{$i}#{px};
+    }
+    
+    .vpadding-#{$i} {
+        padding-top: #{$i}#{px};
+        padding-bottom: #{$i}#{px};
+    }
+    
+    .top-padding-#{$i} {
+        padding-top: #{$i}#{px};
+    }
+    
+    .bottom-padding-#{$i} {
+        padding-bottom: #{$i}#{px};
+    }
+    
+    .hpadding-#{$i} {
+        padding-left: #{$i}#{px};
+        padding-right: #{$i}#{px};
+    }
+    
+    .left-padding-#{$i} {
+        padding-left: #{$i}#{px};
+    }
+    
+    .right-padding-#{$i} {
+        padding-right: #{$i}#{px};
+    }
+}

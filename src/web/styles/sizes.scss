@@ -1,0 +1,45 @@
+@for $i from 0 to 160 {
+    @if $i != 0 {
+        .text-#{$i} {
+            font-size: #{$i}#{px};
+        }
+    }
+
+    @if $i <= 20 {
+        .zindex-#{$i} {
+            z-index: $i;
+        }
+
+        .text-em-#{$i} {
+            font-size: #{$i}#{em};
+        }
+
+        .text-rem-#{$i} {
+            font-size: #{$i}#{rem};
+        }
+    }
+
+    @if $i < 9 {
+        .font-#{$i + 1} {
+            font-weight: #{($i + 1) * 100}
+        }
+    }
+
+    @if $i <= 100 {
+        .width-#{$i} {
+            width: percentage($i / 100);
+        }
+        
+        .height-#{$i} {
+            height: percentage($i / 100);
+        }
+
+        .vwidth-#{$i} {
+            width: #{$i}#{vh};
+        }
+
+        .vheight-#{$i} {
+            height: #{$i}#{vh};
+        }
+    }
+}

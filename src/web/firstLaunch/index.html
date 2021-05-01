@@ -5,21 +5,31 @@
         <title>Celestial Compass - First Launch</title>
 
         <link rel="stylesheet" href="styles://main.css" />
+        <link rel="stylesheet" href="styles://themes/blue.css" />
+        <link rel="stylesheet" href="styles://themes/light.css" />
 
-        <script lib data="default" src="config.js" as="config"></script>
+        <script lib src="config.js" as="config"></script>
+        <script lib src="theme.js" as="themey"></script>
         <script lib src="locals.js"></script>
     </head>
 
-    <body class="center vcenter">
-        <div style="display: none">
-            <h1 class="title"><local key="step0_title" /></h1>
-            <h3><local key="step0" /></h3>
+    <body>
+        <div style="display: none" class="vheight-100 align-center">
+            <div class="vcenter-self width-100">
+                <h4><local key="step0_title" /></h4>
+                <span class="text-24"><local key="step0" /></span>
+            </div>
+        </div>
+
+        <div class="fixed bottom width-100 theme-component-bg theme-text-bold text-24 vpadding-10">
+            <span class="float-right right-padding-20">Skip Step</span>
+            <span class="float-left left-padding-20">Back</span>
         </div>
 
         <script>
             const $ = require("jquery");
             window.addEventListener("loaded-locals", function() {
-                setTimeout(() => $("div").fadeIn(1000), 500)
+                setTimeout(() => $("div").fadeIn(1000), 1069)
             });
         </script>
     </body>
