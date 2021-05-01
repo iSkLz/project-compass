@@ -17,11 +17,11 @@ module.exports = function(grunt) {
                     {
                         expand: true,
                         cwd: "src",
-                        src: "html/png/json/js/txt"
+                        src: "html/png/ico/json/js/txt/ttf"
                             .split("/").map(ext => `**/*.${ext}`),
                         dest: "build/",
                         rename(dest, src) {
-                            return dest + src;
+                            return dest + src.toLowerCase();
                         }
                     }
                 ]
