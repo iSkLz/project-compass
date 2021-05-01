@@ -9,7 +9,13 @@ const extensions = {
     html: "text/html",
     css: "text/css",
     js: "application/javascript",
-    json: "application/json"
+    json: "application/json",
+    ttf: "font/ttf",
+    ico: "image/vnd.microsoft.icon",
+    png: "image/png",
+    svg: "image/svg+xml",
+    jpg: "image/jpeg",
+    jpeg: "image/jpeg",
 };
 
 export default function fileDelivery(name: string, dir: string) {
@@ -41,7 +47,7 @@ export default function fileDelivery(name: string, dir: string) {
         } catch {
             try {
                 let fileExt = path.parse(requestPath).ext;
-                let fileType = extensions[(fileExt.substring(1)) as keyof typeof extensions];
+                let fileType = extensions[(fileExt.substring(1).toLowerCase()) as keyof typeof extensions];
 
                 callback({
                     statusCode: 200,
