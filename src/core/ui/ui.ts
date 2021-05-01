@@ -1,4 +1,4 @@
-import { BrowserWindow, NativeImage, ipcMain, Menu } from "electron";
+import { BrowserWindow, NativeImage, ipcMain, Menu, MessageChannelMain } from "electron";
 import EventEmitter from "events";
 import path from "path";
 import fs from "fs";
@@ -10,9 +10,16 @@ import fileDelivery from "../web/fileDelivery.js";
 import os from "../../helpers/os.js";
 import { app } from "electron/main";
 
-// TODO: This is so messed up.......
-const importsScript = fs.readFileSync(paths.from(paths.data, "imports.js"), "utf8")
-    + '("' + paths.from(paths.web, "libs").replaceAll("\\", "/") + '")'; // Backslashes don't make it through IPC
+// TODO: Is it just... possible to do this cleanly?
+const preloadFunction = fs.readFileSync(path.join(module.path, "preloadinjector.js"), "utf8");
+const preloadScript = ((...args: any[]) =>
+    `${preloadFunction}(${args.map((arg) => `'${arg.toString().replaceAll("'", '\\"')}'`.replaceAll("\\", "/")).join(', ')})`
+);
+const preloadFile = ((ID: string, script: string) => {
+    let filePath = paths.tempDir("preloads")(`${ID}.js`);
+    fs.writeFileSync(filePath, script);
+    return filePath;
+});
 
 //#region Enums & Types
 export type size = {
@@ -142,9 +149,14 @@ export interface WindowOptions {
     nodeState: NodeState;
 
     /**
-     * A path to a script that will be executed before every requested page is loaded
+     * The absolute path to or the code of a script that will be executed before every requested page is loaded
      */
     preload: string;
+
+    /**
+     * Whether to isolate the preload script in a separate contextt or not
+     */
+    isolatePreload: boolean;
 
     /**
      * Whether to allow webview tags
@@ -157,7 +169,7 @@ export interface WindowOptions {
     destroyOnClose: boolean;
 
     /**
-     * Whether to add the node importer script
+     * Whether to execute the node importer script on load
      */
     nodeImporter: boolean;
     
@@ -188,7 +200,8 @@ const defaultWinOptions: WindowOptions = {
     showInTaskbar: true,
     parent: undefined,
     modal: false,
-    preload: "",
+    preload: ";",
+    isolatePreload: false,
     nodeState: NodeState.enabled,
     webview: true,
     destroyOnClose: false,
@@ -219,6 +232,7 @@ export default class UIWindow extends EventEmitter {
 
     private configs: Map<string, Config> = new Map<string, Config>();
     private hasDeliveryProtocol: boolean = false;
+    private preloadFile: string;
 
     constructor(size: size,
         winOptions: Partial<WindowOptions> = defaultWinOptions,
@@ -241,6 +255,9 @@ export default class UIWindow extends EventEmitter {
         }
         
         this.window = new BrowserWindow({
+            // Setting this explicitly solves some rendering problems on some platforms/screens
+            backgroundColor: "#ffffff",
+
             width: size.width, height: size.height,
             minWidth: minSize.width, minHeight: minSize.height,
             title: options.defaultTitle || defaultWinOptions.defaultTitle,
@@ -253,12 +270,14 @@ export default class UIWindow extends EventEmitter {
             parent: options.parent,
             modal: options.modal,
             webPreferences: {
-                nodeIntegration: options.nodeState === NodeState.enabled || options.nodeState == undefined,
+                nodeIntegration: options.nodeState === NodeState.enabled,
+                nodeIntegrationInWorker: options.nodeState === NodeState.enabled,
+                enableRemoteModule: options.nodeState === NodeState.enabled,
                 sandbox: options.nodeState === NodeState.sandbox,
                 webviewTag: options.webview,
                 devTools: Core.Instance.mainConfig.debug,
-                preload: options.preload,
-                contextIsolation: false
+                preload: this.preloadFile = preloadFile(ID, preloadScript(paths.root, options.preload, JSON.stringify(options))),
+                contextIsolation: options.isolatePreload
             }
         });
 
@@ -307,7 +326,7 @@ export default class UIWindow extends EventEmitter {
         // Assign ID, and node importer script (if enabled)
         this.window.webContents.on("did-finish-load", () => {
             this.window.webContents.executeJavaScript(`window.winID = "${ID}"`);
-            if (options.nodeImporter) this.window.webContents.executeJavaScript(importsScript);
+            if (options.nodeImporter) this.window.webContents.executeJavaScript("compass.autoImport()");
         });
 
         //#region IPC Handlers
@@ -381,9 +400,25 @@ export default class UIWindow extends EventEmitter {
         this.serveContent = this.serveContent.bind(this);
         this.loadServed = this.loadServed.bind(this);
         this.destroy = this.destroy.bind(this);
+        this.createChannel = this.createChannel.bind(this);
     }
 
+    /**
+     * Creates a two-ports message channel and sends the ports to their respective windows
+     * @param window The window with which the current window should share the channel
+     */
+    public createChannel(window: UIWindow) {
+        let channel = new MessageChannelMain();
+        this.window.webContents.postMessage("channel", window.ID, [channel.port1]);
+        window.window.webContents.postMessage("channel", this.ID, [channel.port2]);
+    }
+
+    /**
+     * Destroy the window reference and delete the UI instance
+     */
     public destroy() {
+        if (fs.existsSync(this.preloadFile)) fs.unlinkSync(this.preloadFile);
+        this.window.close();
         (this.window as any) = null;
         UIWindow.Instances.delete(this.ID);
     }
