@@ -6,7 +6,7 @@
     "./src/**/*.tsx"
   ],
   "compilerOptions": {
-    "target": "es2015",
+    "target": "ES2020",
     "module": "commonjs",
     "moduleResolution": "node",
     "sourceMap": true,
@@ -20,7 +20,7 @@
     "forceConsistentCasingInFileNames": true,
 
     "lib": [
-      "ES5", "ES6", "DOM"
+      "ES5", "ES2015", "ES2016", "ES2017", "ES2018", "ES2019", "ES2020", "DOM"
     ]
   }
 }
