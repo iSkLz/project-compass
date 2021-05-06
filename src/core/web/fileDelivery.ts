@@ -1,6 +1,6 @@
 import { protocol } from "electron";
 import { serializeError } from "serialize-error";
-import fs, { createReadStream } from "fs";
+import fs from "fs";
 import path from "path";
 
 // TODO: Implement formats
@@ -18,12 +18,15 @@ const extensions = {
     jpeg: "image/jpeg",
 };
 
-export default function fileDelivery(name: string, dir: string) {
+export default function fileDelivery(name: string, dir: string,
+    pathTransformer?: (path: string) => string) {
     // Long sessions will unevitably run into conflicting protocol names
     // Most of the time, window IDs
     protocol.unregisterProtocol(name);
     return protocol.registerStreamProtocol(name, (request, callback) => {
-        let requestPath = path.join(dir, request.url.substring(name.length + 3));
+        let requestPath = request.url.substring(name.length + 3);
+        if (pathTransformer) requestPath = pathTransformer(requestPath);
+        requestPath = path.join(dir, requestPath);
 
         if (!fs.existsSync(requestPath)) {
             callback({
