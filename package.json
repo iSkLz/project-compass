@@ -6,15 +6,18 @@
     "name": "SkLz"
   },
   "license": "MIT",
-  "main": "build/core/boot.js",
+  "main": "main.js",
   "scripts": {
     "ts": "tsc",
     "tsx": "tsc -p tsconfig-web.json",
     "tsall": "npm run ts && npm run tsx",
+
     "tsw": "tsc -w",
     "tsxw": "tsc -p tsconfig-web.json -w",
-    "launch": "npx electron build/core/boot.js",
+
     "files": "npx grunt",
+
+    "launch": "npx electron .",
     "build": "npm run ts && npm run tsx && npm run files",
     "run": "npm run build && npm run launch",
     "runfiles": "npm run files && npm run launch",
@@ -54,6 +57,8 @@
   },
   "dependencies": {
     "electron-squirrel-startup": "^1.0.0",
+    "flexlayout-react": "^0.5.6",
+    "github-api": "^3.2.3",
     "golden-layout": "^2.0.2",
     "jquery": "^3.5.1",
     "materialize-css": "^1.0.0-rc.2",
@@ -61,14 +66,12 @@
     "react-dom": "^16.14.0",
     "sass": "^1.27.0",
     "semver": "^7.3.4",
-    "ws": "^7.4.3",
-    "serialize-error": "^7.0.1"
+    "serialize-error": "^7.0.1",
+    "ws": "^7.4.3"
   },
   "config": {
     "forge": {
-      "packagerConfig": {
-
-      },
+      "packagerConfig": {},
       "makers": [
         {
           "name": "@electron-forge/maker-squirrel",

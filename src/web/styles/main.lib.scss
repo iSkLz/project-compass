@@ -12,6 +12,15 @@ body {
     font-weight: 300;
 }
 
+a {
+    color: inherit !important;
+    text-decoration-line: inherit;
+
+    .line {
+        text-decoration-line: underline;
+    }
+}
+
 @for $i from 1 to 7 {
     h#{$i} {
         font-size: #{4.5 - $i/2}#{em};

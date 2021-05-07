@@ -6,8 +6,8 @@ import locals from "./locals.js";
 import { execFile } from "child_process";
 
 import path from "path";
-import UIWindow, { NodeState, ShowMode, WindowState } from "./ui/ui.js";
-import fileDelivery from "./web/fileDelivery.js";
+import UIWindow, { NodeState, ShowMode, WindowState } from "./web/ui.js";
+import fileDelivery from "./web/filedelivery.js";
 import { app } from "electron/main";
 
 interface CoreConfig {
@@ -87,7 +87,7 @@ export default class Core {
         {
             defaultTitle: "Celestial Compass - First Launch",
             state: WindowState.maximized,
-            icon: "compass.png",
+            icon: paths.from(paths.pics, "icons/compass.png"),
             frameless: false,
             show: ShowMode.whenReady,
             alwaysOnTop: false,
@@ -100,9 +100,9 @@ export default class Core {
         });
 
         UI.addConfig("main", this.config);
-        UI.serveContent(paths.fromRoot("web/firstLaunch"))("index.html");
+        UI.serveContent(paths.fromRoot("web/firstlaunch"))("index.html");
 
-        UI.on("ipcAsync", (event, req) => {
+        UI.on("ipcAsync", (_event, req) => {
             if (req.finished) this.restart();
         });
     }

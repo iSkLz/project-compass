@@ -3,7 +3,8 @@
     "enable": false
   },
   "include": [
-    "./src/**/*.tsx"
+    "./src/**/*.tsx",
+    "./src/**/*.d.ts"
   ],
   "compilerOptions": {
     "target": "ES2020",

@@ -17,7 +17,7 @@ module.exports = function(grunt) {
                     {
                         expand: true,
                         cwd: "src",
-                        src: "html/png/ico/json/js/txt/ttf"
+                        src: "html/png/ico/json/js/txt/ttf/mjs"
                             .split("/").map(ext => `**/*.${ext}`),
                         dest: "build/",
                         rename(dest, src) {

@@ -6,9 +6,9 @@ import locals from "../locals.js";
 import Core from "../core.js";
 import Config from "../config.js";
 import paths from "../../helpers/paths.js";
-import fileDelivery from "../web/fileDelivery.js";
+import fileDelivery from "./filedelivery.js";
 import os from "../../helpers/os.js";
-import { app } from "electron/main";
+import { Event } from "electron/main";
 
 // TODO: Is it just... possible to do this cleanly?
 const preloadFunction = fs.readFileSync(path.join(module.path, "preloadinjector.js"), "utf8");
@@ -167,11 +167,6 @@ export interface WindowOptions {
      * Whether to destroy the window when closed
      */
     destroyOnClose: boolean;
-
-    /**
-     * Whether to execute the node importer script on load
-     */
-    nodeImporter: boolean;
     
     /**
      * The menu bar to use for the window, null for nothing
@@ -205,7 +200,6 @@ const defaultWinOptions: WindowOptions = {
     nodeState: NodeState.enabled,
     webview: true,
     destroyOnClose: false,
-    nodeImporter: true,
     menuBar: null,
     menuBarState: MenuState.hidden
 };
@@ -281,6 +275,7 @@ export default class UIWindow extends EventEmitter {
             }
         });
 
+        //#region Menu Bar
         // Assign the menu bar if one is specified
         if (options.menuBar != null) this.window.setMenu(options.menuBar);
         // Set its visibility state
@@ -296,6 +291,7 @@ export default class UIWindow extends EventEmitter {
                 this.window.removeMenu();
                 break;
         }
+        //#endregion
         
         //#region Window State
         // When closed, dereference the window and unlist from static instances array
@@ -323,10 +319,9 @@ export default class UIWindow extends EventEmitter {
         });
         //#endregion
 
-        // Assign ID, and node importer script (if enabled)
+        // Assign ID
         this.window.webContents.on("did-finish-load", () => {
             this.window.webContents.executeJavaScript(`window.winID = "${ID}"`);
-            if (options.nodeImporter) this.window.webContents.executeJavaScript("compass.autoImport()");
         });
 
         //#region IPC Handlers
@@ -441,25 +436,26 @@ export default class UIWindow extends EventEmitter {
     }
 
     /**
-     * Serves a directory to the window.
+     * Serves a directory to the window using a protocol.
      * If one has already been served, it will be replaced
      * @param dir The directory to serve
      */
     public serveContent(dir: string) {
-        fileDelivery(this.ID, dir);
+        fileDelivery(this.ID, dir, path => path.substring(this.ID.length + 1));
         this.hasDeliveryProtocol = true;
         return this.loadServed;
     }
 
     /**
-     * Loads a file from a directory previously served using serveContent
+     * Loads a file from a directory previously served using a protocol
      * Throws an error if no directory has been served
      * @param filePath Path to the file relative to the served directory
      */
     public loadServed(filePath: string) {
+        if (!this.hasDeliveryProtocol) throw new Error("No directory has been served");
+
         // Normalize into a POSIX-style path
         filePath = path.normalize(filePath).replaceAll("\\", "/");
-        if (!this.hasDeliveryProtocol) throw new Error("No directory has been served");
-        this.window.loadURL(`${this.ID}://${filePath}`);
+        this.window.loadURL(`${this.ID}://${this.ID}/${filePath}`);
     }
 }

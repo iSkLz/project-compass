@@ -40,18 +40,31 @@ class PathsHelper {
         this.ahornStorage = path.join(this.appStorage, "Ahorn");
     }
 
+    /**
+     * Gets the user-configured path to the directory containing Celeste
+     */
     get celeste(): string {
         return Core.Instance.mainConfig.celestePath;
     }
 
+    /**
+     * Resolves a relative path starting from Compass's root folder
+     */
     public fromRoot(relativePath: string) {
         return path.join(this.root, relativePath);
     }
 
+    /**
+     * Alias for path.join
+     */
     public from(originPath: string, relativePath: string) {
         return path.join(originPath, relativePath);
     }
 
+    /**
+     * Resolves a relative path starting from Compass's temp folder
+     * @returns A function that can resolve a relative path starting from the result of this function
+     */
     public tempDir(relativePath: string) {
         let resPath = this.from(this.temp, relativePath);
         
@@ -60,6 +73,15 @@ class PathsHelper {
         });
 
         return this.from.bind(this, resPath);
+    }
+
+    /**
+     * Creates a function that resolves relative paths starting from the specified directory
+     */
+    public here(dir: string) {
+        return (relativePath: string) => {
+            path.join(dir, relativePath);
+        }
     }
 }
 

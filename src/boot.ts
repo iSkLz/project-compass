@@ -1,8 +1,10 @@
-import Core from "./core.js";
+import Core from "./core/core.js";
 import { app } from "electron";
 import { serializeError } from "serialize-error";
-import os from "../helpers/os.js";
-import UIWindow from "./ui/ui.js";
+import os from "./helpers/os.js";
+import UIWindow from "./core/web/ui.js";
+
+(global as any).compassBooted = true;
 
 // TODO: Tray
 
@@ -29,12 +31,16 @@ app.on("window-all-closed", () => {
     }
 });
 
-app.once("ready", () => {
-    try {
-        new Core().init();
-    } catch (ex) {
-        logException(ex);
-    }
-});
+export default (new Promise<Core>((resolve, reject) => {
+    app.whenReady().then(() => {
+        try {
+            let core = new Core();
+            resolve(core);
+            core.init();
+        } catch (ex) {
+            logException(ex);
+        }
+    });
+}));
 
 //process.on("uncaughtException", logException);

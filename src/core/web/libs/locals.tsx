@@ -1,7 +1,7 @@
 import { ipcRenderer } from "electron";
 import $ from "jquery";
-import utils from "../../helpers/utils.js";
-import React, { Component } from "react";
+import utils from "../../../helpers/utils.js";
+import React from "react";
 import ReactDOM from "react-dom";
 
 const cache = new Map<string, Map<string, string>>();
@@ -52,10 +52,10 @@ export async function requestLocalAsync(path: string, key: string): Promise<stri
     });
 }
 
-export function ReactComponent(props: any) {
+export function ReactComponent(props: {local: {path: string, key: string}}) {
     return <>
         {
-            requestLocalSync(props.local.path || defaultPath, props.local.key)
+            requestLocalSync(props.local.path || defaultPath || "", props.local.key)
                 .split("\n")
                 .map((line, i, arr) => <>
                     {line}{i != arr.length - 1 ? <br /> : ""}
@@ -64,22 +64,23 @@ export function ReactComponent(props: any) {
     </>;
 }
 
-$.ready.then(() => {
-    if (defaultPath != undefined) cachePathSync(defaultPath);
-
-    var list = document.querySelectorAll("local");
-    for (let i = 0; i < list.length; i++) {
-        const elem = list[i] as HTMLElement;
-
-        const path = elem.getAttribute("path") || defaultPath;
-        const key = elem.getAttribute("key");
+export function replaceLocalElements() {
+    return new Promise<void>((resolve, reject) => {
+        $.ready.then(() => {
+            if (defaultPath != undefined) cachePathSync(defaultPath);
         
-        if (path != undefined && key != undefined)
-            ReactDOM.render(<ReactComponent local={{path, key}} />, elem);
-    }
-
-    window.dispatchEvent(new Event("loaded-locals", {
-        bubbles: false,
-        cancelable: false
-    }));
-});
+            var list = document.querySelectorAll("local");
+            for (let i = 0; i < list.length; i++) {
+                const elem = list[i] as HTMLElement;
+        
+                const path = elem.getAttribute("path") || defaultPath;
+                const key = elem.getAttribute("key");
+                
+                if (path != undefined && key != undefined)
+                    ReactDOM.render(<ReactComponent local={{path, key}} />, elem);
+            }
+            
+            resolve();
+        });
+    });
+}
