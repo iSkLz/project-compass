@@ -1,0 +1,26 @@
+-- Desktop Integration --
+Global:
+Launch actions: Jump list actions, dock context menu
+Recent files: Recent projects
+Acess protocol: compass://
+File association: .compassprj, .compasspkg, .compassapp
+
+Instanced:
+Tray: Main
+Notification
+
+Window Plugins:
+Represented file
+Tray
+Progress bar
+
+Libraries:
+Drag & drop
+Title bar
+
+To look into:
+Badge
+
+-- TODO --
+Warning on BrowserWindow that is not UIWindow ('browser-window-created')
+Single instancing

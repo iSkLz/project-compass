@@ -1,23 +1,13 @@
 module.exports = function(grunt) {
     grunt.initConfig({
-        pkg: grunt.file.readJSON("package.json"),
-        
-        ts: {
-            default: {
-                tsconfig: "./tsconfig.json"
-            },
-            web: {
-                tsconfig: "./tsconfig-web.json"
-            }
-        },
-		
+        pkg: grunt.file.readJSON("package.json"),		
         copy: {
             default: {
                 files: [
                     {
                         expand: true,
                         cwd: "src",
-                        src: "html/png/ico/json/js/txt/ttf/mjs"
+                        src: "html/png/ico/json/js/txt/ttf/mjs/d.ts"
                             .split("/").map(ext => `**/*.${ext}`),
                         dest: "build/",
                         rename(dest, src) {
@@ -45,11 +35,8 @@ module.exports = function(grunt) {
         }
     });
 
-    grunt.loadNpmTasks("grunt-contrib-uglify");
     grunt.loadNpmTasks("grunt-contrib-copy");
-    grunt.loadNpmTasks("grunt-contrib-htmlmin");
     grunt.loadNpmTasks("grunt-contrib-sass");
-    grunt.loadNpmTasks("grunt-ts");
 
     grunt.task.registerTask("default", ["copy:default", "sass:default"]);
 }

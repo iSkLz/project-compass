@@ -1,0 +1,19 @@
+{
+    "name": "celestial-compass",
+    "version": "0.0.1",
+    "description": "A highly extensible modding toolset for Celeste and Everest",
+    "main": "main.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/iSkLz/project-compass.git"
+    },
+    "author": "SkLz",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/iSkLz/project-compass/issues"
+    },
+    "homepage": "https://github.com/iSkLz/project-compass#readme"
+}  

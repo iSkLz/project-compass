@@ -1,54 +1,42 @@
 {
-  "name": "celestialcompass",
-  "version": "0.0.4",
-  "description": "A highly extensible IME for Celeste and Everest",
-  "author": {
-    "name": "SkLz"
-  },
-  "license": "MIT",
+  "name": "celestial-compass-dev",
+  "version": "0.0.1",
+  "description": "Celestial Compass's development package",
   "main": "main.js",
   "scripts": {
-    "ts": "tsc",
-    "tsx": "tsc -p tsconfig-web.json",
+    "ts": "npx tsc -p tsconfig-main.json",
+    "tsx": "npx tsc -p tsconfig-web.json",
     "tsall": "npm run ts && npm run tsx",
 
-    "tsw": "tsc -w",
-    "tsxw": "tsc -p tsconfig-web.json -w",
+    "tsw": "npx tsc -p tsconfig-main.json -w",
+    "tsxw": "npx tsc -p tsconfig-web.json -w",
 
     "files": "npx grunt",
 
     "launch": "npx electron .",
     "build": "npm run ts && npm run tsx && npm run files",
     "run": "npm run build && npm run launch",
-    "runfiles": "npm run files && npm run launch",
-    "packagewin64": "electron-forge package -p win32 -a x64",
-    "packagewin86": "electron-forge package -p win32 -a ia32",
-    "packagelinux": "electron-forge package -p linux -a x64",
-    "packagemac": "electron-forge package -p darwin -a x64",
-    "packagewin": "npm run packagewin64 && npm run packagewin86",
-    "package": "npm run packagewin && npm run packagelinux && npm run packagemac",
-    "makewin64": "electron-forge make -p win32 -a x64 --skip-package",
-    "makewin32": "electron-forge make -p win32 -a ia32 --skip-package",
-    "makewin": "npm run makewin64 && npm run makewin32",
-    "makelinux": "electron-forge make -p linux -a x64 --skip-package",
-    "makemac": "electron-forge make -p darwin -a x64 --skip-package",
-    "make": "npm run makewin && npm run makelinux && npm run makemac"
+    "runfiles": "npm run files && npm run launch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iSkLz/project-compass.git"
+  },
+  "author": "SkLz",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/iSkLz/project-compass/issues"
   },
   "devDependencies": {
-    "@electron-forge/cli": "^6.0.0-beta.54",
-    "@electron-forge/maker-deb": "^6.0.0-beta.54",
-    "@electron-forge/maker-rpm": "^6.0.0-beta.54",
-    "@electron-forge/maker-squirrel": "^6.0.0-beta.54",
-    "@electron-forge/maker-zip": "^6.0.0-beta.54",
     "@types/jquery": "^3.5.3",
     "@types/materialize-css": "^1.0.8",
     "@types/react": "^16.9.53",
     "@types/react-dom": "^16.9.8",
     "electron": "^11.2.3",
     "grunt": "^1.3.0",
+    "grunt-cli": "^1.3.2",
     "grunt-contrib-copy": "^1.0.0",
     "grunt-contrib-uglify": "^5.0.0",
-    "grunt-ts": "^6.0.0-beta.22",
     "grunt-webpack": "^4.0.2",
     "sass-loader": "^11.0.1",
     "grunt-contrib-htmlmin": "^3.1.0",
@@ -69,25 +57,5 @@
     "serialize-error": "^7.0.1",
     "ws": "^7.4.3"
   },
-  "config": {
-    "forge": {
-      "packagerConfig": {},
-      "makers": [
-        {
-          "name": "@electron-forge/maker-squirrel",
-          "config": {
-            "name": "CelestialCompass",
-            "title": "Celestial Compass"
-          }
-        },
-        {
-          "name": "@electron-forge/maker-zip"
-        },
-        {
-          "name": "@electron-forge/maker-deb",
-          "config": {}
-        }
-      ]
-    }
-  }
+  "homepage": "https://github.com/iSkLz/project-compass#readme"
 }
