@@ -3,9 +3,13 @@ Welcome to the Project Compass repository! This document attempts at explaining 
 
 # Concepts and acronyms
 PC => Project Compass
+
 ME => Modding environment
+
 Package => A single modding tool existing within a modding environment.
+
 Library package => A collection of modding functionality embedded within an installable ME package for use by other packages.
+
 Mod package => An ME package bundled with a mod (that would be loaded in the game).
 
 # What is Project Compass?
